@@ -1,4 +1,9 @@
+# Ignore all large/raw data files
 datasets/*.csv
 datasets/*.zip
 *.pbix
 *.xlsx
+
+# BUT keep sample CSVs (override ignore rule above)
+!datasets/*sample*.csv
+
