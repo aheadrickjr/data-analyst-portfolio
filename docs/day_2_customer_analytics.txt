@@ -1,0 +1,76 @@
+========================================
+DAY 2 SPRINT – Customer Analytics (SQL)
+========================================
+
+🎯 OBJECTIVE
+- Build and run first SQL project against Postgres
+- Capture results of core analytics queries
+- Commit artifacts to GitHub portfolio
+
+📝 TASKS
+1. Confirm Postgres service running and connect to de_portfolio
+2. Create schema "da" and table "ecommerce_sales"
+3. Load ecommerce_sales_sample.csv into da.ecommerce_sales
+4. Run analysis queries:
+   - Top 10 customers by total spend
+   - Monthly revenue trend
+   - Repeat buyers
+5. Export results as CSV files
+6. Save queries into queries.sql
+7. Commit CSV + SQL files to repo
+
+💻 COMMANDS / CODE
+
+# PostgreSQL
+\c de_portfolio
+\dn
+\dt da.*
+SELECT COUNT(*) FROM da.ecommerce_sales;
+
+-- Top 10 customers
+SELECT CustomerID,
+       ROUND(SUM(UnitPrice*Quantity)::numeric, 2) AS total_spent
+FROM da.ecommerce_sales
+GROUP BY CustomerID
+ORDER BY total_spent DESC
+LIMIT 10;
+
+-- Monthly trend
+SELECT DATE_TRUNC('month', InvoiceDate) AS month,
+       ROUND(SUM(UnitPrice*Quantity)::numeric, 2) AS revenue
+FROM da.ecommerce_sales
+GROUP BY 1
+ORDER BY 1;
+
+-- Repeat buyers
+SELECT CustomerID,
+       COUNT(DISTINCT InvoiceNo) AS orders
+FROM da.ecommerce_sales
+GROUP BY CustomerID
+HAVING COUNT(DISTINCT InvoiceNo) > 1
+ORDER BY orders DESC
+LIMIT 10;
+
+# Bash (export results)
+psql -h localhost -p 5432 -U "$USER" -d de_portfolio -c "COPY (...query...) TO STDOUT WITH CSV HEADER;" > projects/sql/customer_analytics/[filename].csv
+
+# Git
+git add projects/sql/customer_analytics/*.csv projects/sql/customer_analytics/queries.sql
+git commit -m "Day 2: Customer Analytics queries + results"
+git push
+
+📂 ARTIFACTS (added to repo)
+- datasets/ecommerce_sales_sample.csv
+- projects/sql/customer_analytics/queries.sql
+- projects/sql/customer_analytics/top_customers.csv
+- projects/sql/customer_analytics/monthly_trend.csv
+- projects/sql/customer_analytics/repeat_buyers.csv
+
+✅ OUTCOME
+- Postgres instance confirmed operational
+- Schema "da" with ecommerce_sales table created
+- 199 rows loaded from sample CSV
+- 3 analysis queries executed successfully
+- Results saved as CSV and pushed to GitHub
+- Portfolio now has its first end-to-end project
+
