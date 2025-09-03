@@ -40,3 +40,14 @@ Hands-on Data Analytics portfolio featuring SQL queries, Power BI dashboards, an
 - **GitHub:** [github.com/aheadrickjr](https://github.com/aheadrickjr)  
 
 ---
+
+## 📁 Repo Layout
+
+data-analyst-portfolio/
+├─ datasets/ # CSVs and raw data
+├─ projects/
+│ ├─ sql/ # .sql files + READMEs
+│ ├─ bi/ # .pbix exports + images
+│ └─ python/ # notebooks (.ipynb) and scripts
+└─ assets/
+└─ screenshots/ # dashboard & chart images for README
