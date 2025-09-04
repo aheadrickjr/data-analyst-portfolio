@@ -7,3 +7,6 @@ datasets/*.zip
 # BUT keep sample CSVs (override ignore rule above)
 !datasets/*sample*.csv
 
+*:Zone.Identifier
+Thumbs.db
+Desktop.ini
