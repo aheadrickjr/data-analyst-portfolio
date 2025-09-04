@@ -1,0 +1,48 @@
+========================================
+DAY 3 SPRINT – Customer Analytics Notebook
+========================================
+
+🎯 OBJECTIVE
+- Build first BI-style artifact using Azure Data Studio Notebooks
+- Re-run Day 2 SQL queries inside a notebook with inline results
+- Capture screenshot(s) of queries + results for portfolio
+
+📝 TASKS
+1. Open Azure Data Studio workspace (data-analyst-portfolio)
+2. Create new notebook:
+   - Kernel = SQL
+   - Connection = WSL Postgres (de_portfolio)
+   - Save as projects/bi/customer_analytics/customer_analytics_notebook.ipynb
+3. Add notebook cells:
+   - Markdown intro: project overview
+   - SQL: Top 10 customers by spend
+   - SQL: Monthly revenue trend
+   - SQL: Repeat buyers
+   - Markdown: Insights summary
+4. Run all cells and verify results inline
+5. Export screenshot:
+   - Save as assets/screenshots/day3_customer_analytics_notebook.png
+6. Commit notebook + screenshot to repo
+
+💻 COMMANDS / CODE
+
+# Git
+git add projects/bi/customer_analytics/customer_analytics_notebook.ipynb
+git add assets/screenshots/day3_customer_analytics_notebook.png
+git commit -m "Day 3: Added Customer Analytics ADS Notebook (queries + results)"
+git push
+
+# PostgreSQL checks
+\c de_portfolio
+\dt da.*
+SELECT COUNT(*) FROM da.ecommerce_sales;
+
+📂 ARTIFACTS (to be added to repo)
+- projects/bi/customer_analytics/customer_analytics_notebook.ipynb
+- assets/screenshots/day3_customer_analytics_notebook.png
+
+✅ OUTCOME
+- First ADS Notebook created and connected to Postgres
+- Day 2 queries re-run with inline results
+- Notebook + screenshot committed to GitHub
+- Portfolio now shows end-to-end flow: SQL → Notebook → Insights
