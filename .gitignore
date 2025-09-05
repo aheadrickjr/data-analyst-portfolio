@@ -1,12 +1,20 @@
-# Ignore all large/raw data files
-datasets/*.csv
-datasets/*.zip
-*.pbix
-*.xlsx
+# Python
+.venv/
+__pycache__/
+*.pyc
 
-# BUT keep sample CSVs (override ignore rule above)
-!datasets/*sample*.csv
+# Local secrets
+.env
 
-*:Zone.Identifier
-Thumbs.db
-Desktop.ini
+# Data (keep Day4 artifacts tracked)
+data/raw/
+data/processed/
+*.parquet
+
+# Editors/OS
+.DS_Store
+.idea/
+
+# VS Code (track settings.json only)
+.vscode/*
+!.vscode/settings.json
