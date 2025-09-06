@@ -51,3 +51,27 @@ data-analyst-portfolio/
 │ └─ python/ # notebooks (.ipynb) and scripts
 └─ assets/
 └─ screenshots/ # dashboard & chart images for README
+
+## Day 4 — PostgreSQL Metadata & ERD
+
+**Goal:** Capture database metadata (tables, columns, keys, sizes), export CSVs, and produce a lightweight ERD + per-table data dictionaries.
+
+**Deliverables (in repo):**
+- CSVs: `artifacts/day4/` → `tables.csv`, `tables_like.csv`, `columns_<table>.csv`, `indexes_<table>.csv`, `pkeys_<table>.csv`, `rowcount_<table>.csv`, `fkeys.csv`
+- ERD:
+  - Template: `docs/models/ERD_Template.md`
+  - Auto-generated (from FKs): `artifacts/day4/ERD_from_metadata.md`
+- Data dictionaries: `artifacts/day4/dictionary_<table>.md`
+- Runners:
+  - SQL exports: `scripts/sql/run_metadata_sql.sh`
+  - Day-4 convenience: `scripts/day4/meta_runsqls_day4.sh` *(if present)*
+
+**Prereqs (WSL):**
+- Python venv: `sudo apt install -y python3-venv` (or `python3.12-venv`)
+- Postgres client: `sudo apt install -y postgresql-client`
+- `.env` set for local socket auth (no host):  
+  ```ini
+  PGUSER=arval
+  PGDATABASE=postgres
+  # PGHOST unset to prefer Unix socket; set PGSSLMODE=prefer or comment it out
+
