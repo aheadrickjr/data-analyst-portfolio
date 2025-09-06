@@ -1,0 +1,90 @@
+========================================
+DAY 4 SPRINT – PostgreSQL Metadata & ERD
+========================================
+
+🎯 OBJECTIVE
+- Export database metadata (tables, columns, keys, sizes) to CSV
+- Generate a lightweight ERD from foreign keys
+- Produce per-table data dictionaries from column metadata
+- Keep everything reproducible via scripts (WSL-first)
+
+📝 TASKS
+1) Environment
+   - WSL Python venv active (.venv); Postgres client installed
+   - .env uses local socket auth:
+     PGUSER=arval, PGDATABASE=postgres, (PGHOST unset), PGSSLMODE=prefer or commented
+
+2) Metadata exports → CSVs
+   - Runner: scripts/sql/run_metadata_sql.sh
+   - Commands run:
+     ./scripts/sql/run_metadata_sql.sh tables_all
+     ./scripts/sql/run_metadata_sql.sh table_like -l '%customer%'
+     ./scripts/sql/run_metadata_sql.sh columns  -s public -t customers
+     ./scripts/sql/run_metadata_sql.sh indexes  -s public -t customers
+     ./scripts/sql/run_metadata_sql.sh pkeys    -s public -t customers
+     ./scripts/sql/run_metadata_sql.sh rowcount -s public -t customers
+     ./scripts/sql/run_metadata_sql.sh fkeys -s public
+   - Output folder: artifacts/day4/
+
+3) Data dictionaries (Markdown)
+   - Generated one file per table from columns_*.csv:
+     artifacts/day4/dictionary_<table>.md
+
+4) ERD
+   - Canonical template: docs/models/ERD_Template.md
+   - Auto-generated from FKs: artifacts/day4/ERD_from_metadata.md (Mermaid)
+
+5) QC
+   - Row counts: wc -l artifacts/day4/*.csv
+   - Spot check: head -n 5 artifacts/day4/tables.csv
+   - Mermaid preview in VS Code/GitHub to confirm ERD renders
+
+📦 DELIVERABLES
+- CSVs: tables.csv, tables_like.csv, columns_customers.csv, indexes_customers.csv,
+         pkeys_customers.csv, rowcount_customers.csv, fkeys.csv
+- Docs: artifacts/day4/dictionary_<table>.md, artifacts/day4/ERD_from_metadata.md
+- Scripts: scripts/sql/run_metadata_sql.sh (and organized helpers under scripts/)
+
+💻 COMMANDS / CODE (reference)
+# Sanity
+psql -d postgres -c '\conninfo'
+
+# Generate dictionaries (from columns_*.csv)
+python3 - <<'PY'
+import csv, glob, pathlib
+out = pathlib.Path("artifacts/day4"); out.mkdir(parents=True, exist_ok=True)
+def pick(r,k,d=""): return r.get(k,d)
+for p in glob.glob("artifacts/day4/columns_*.csv"):
+  t = pathlib.Path(p).stem.replace("columns_","")
+  rows = list(csv.DictReader(open(p, newline='', encoding='utf-8')))
+  rows.sort(key=lambda r: int(r.get('ordinal_position',0) or 0))
+  md = out / f"dictionary_{t}.md"
+  with md.open("w", encoding="utf-8") as w:
+    w.write(f"# Data Dictionary — {t}\n\n| # | column | data_type | nullable | default |\n|---:|---|---|:--:|---|\n")
+    for r in rows:
+      w.write(f"| {pick(r,'ordinal_position')} | {pick(r,'column_name')} | {pick(r,'data_type')} | {pick(r,'is_nullable')} | {pick(r,'column_default')} |\n")
+print("ok")
+PY
+
+# ERD from foreign keys (expects artifacts/day4/fkeys.csv)
+python3 - <<'PY'
+import csv, pathlib
+fk = pathlib.Path("artifacts/day4/fkeys.csv"); out = pathlib.Path("artifacts/day4/ERD_from_metadata.md")
+rels=[]; tables=set()
+for r in csv.DictReader(open(fk, encoding='utf-8')):
+  s=f"{r['src_schema']}.{r['src_table']}"; t=f"{r['tgt_schema']}.{r['tgt_table']}"; c=r['src_column']
+  rels.append((s,t,c)); tables.update([s,t])
+with out.open("w", encoding="utf-8") as w:
+  w.write("# ERD (auto-generated from foreign keys)\n\n```mermaid\nerDiagram\n")
+  for s,t,c in rels: w.write(f"  {s.replace('.','_')} ||--o{{ {t.replace('.','_')} : {c}\n")
+  for tt in sorted(tables): w.write(f"\n  {tt.replace('.','_')} {{\n    -- columns omitted (see dictionaries) --\n  }}\n")
+  w.write("\n```\n")
+print("ok")
+PY
+
+✅ DONE WHEN
+- All CSVs present in artifacts/day4/
+- dictionary_<table>.md files generated
+- ERD_from_metadata.md renders in preview
+- Scripts live under scripts/ and are executable
+
