@@ -117,5 +117,5 @@ Day 4 demonstrated ability to explore relational schemas, generate diagrams, and
   ```ini
   PGUSER=arval
   PGDATABASE=de_commerce
-  # PGHOST unset to prefer Unix socket; set PGSSLMODE=prefer or comment it out
+  # PGHOST unset to prefer Unix socket; set PGSSLMODE=prefer or comls -l 
 
