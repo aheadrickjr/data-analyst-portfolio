@@ -24,12 +24,16 @@ Hands-on Data Analytics portfolio featuring SQL queries, Power BI dashboards, an
 | **Financial Trends SQL Project** | SQL | SQL Server, PostgreSQL | 🔄 In Progress |
 | **Customer Churn Dashboard** | BI | Power BI | 🔄 In Progress |
 | **Public Health Data Exploration** | Python EDA | Python (pandas, matplotlib, seaborn) | 🔄 In Progress |
+| **Python EDA Notebook** | Data Science| Python (pandas, matplotlib)    | In Progress                     |
+| **PySpark Aggregation** | Big Data    | Spark (PySpark), Parquet       | In Progress                     |
+| **Kafka Streaming**     | Streaming   | Kafka, PostgreSQL              | In Progress                     |
 
 ---
 
 ## 🚀 Roadmap (30-Day Sprint)
 - [x] Day 1: Repo + README setup  
-- [ ] Day 2–7: SQL + BI projects published  
+- [x] Day 2–5: SQL + ETL projects published (Customer Analytics)  
+- [ ] Day 6–7: BI dashboards integration  
 - [ ] Week 2: Python EDA notebook uploaded  
 - [ ] Week 3–4: Portfolio polish + job applications  
 
@@ -52,19 +56,59 @@ data-analyst-portfolio/
 └─ assets/
 └─ screenshots/ # dashboard & chart images for README
 
+
+---
+
 ## Day 4 — PostgreSQL Metadata & ERD
 
-**Goal:** Capture database metadata (tables, columns, keys, sizes), export CSVs, and produce a lightweight ERD + per-table data dictionaries.
+**Goal:** Build SQL toolkit to query database metadata (table/column search, PK/FK, row counts) and generate ERDs.  
+
+**Deliverables:**
+- SQL scripts: `projects/sql/meta_*.sql`
+- Bash wrappers: `run_metadata_sql.sh`, `meta_runsqls_day4.sh`
+- CSV exports under `artifacts/day4/`
+- ERD template: `docs/models/erd_template.md`
+
+**Notes:**  
+Day 4 demonstrated ability to explore relational schemas, generate diagrams, and prep for modeling.
+
+---
+
+## Day 5 — Customer Analytics ETL (Staging → Star Schema)
+
+**Goal:** Load ecommerce sales data into Postgres staging, normalize into a star schema (dim_date, dim_customer, dim_product, fact_sales), and export analytics-ready artifacts.
 
 **Deliverables (in repo):**
-- CSVs: `artifacts/day4/` → `tables.csv`, `tables_like.csv`, `columns_<table>.csv`, `indexes_<table>.csv`, `pkeys_<table>.csv`, `rowcount_<table>.csv`, `fkeys.csv`
-- ERD:
-  - Template: `docs/models/ERD_Template.md`
-  - Auto-generated (from FKs): `artifacts/day4/ERD_from_metadata.md`
-- Data dictionaries: `artifacts/day4/dictionary_<table>.md`
-- Runners:
-  - SQL exports: `scripts/sql/run_metadata_sql.sh`
-  - Day-4 convenience: `scripts/day4/meta_runsqls_day4.sh` *(if present)*
+- Staging: `stage.raw_ecommerce` (541,909 rows)
+- DWH: `dwh.dim_date`, `dwh.dim_customer`, `dwh.dim_product`, `dwh.fact_sales`
+- CSVs:  
+  - `artifacts/day5/sales_by_country_summary.csv`  
+  - `artifacts/day5/top_products_by_revenue.csv`
+- Scripts:  
+  - Autoloader: `scripts/sql/day5_autoload_csv.py`  
+  - DWH schema: `scripts/sql/day5_create_tables.sql`  
+  - Populate ETL: `scripts/sql/day5_populate_dim_fact.sql`  
+  - Artifact exports: `scripts/sql/day5_export_artifacts.sh`
+
+**Results:**
+- dim_customer: 4,373  
+- dim_date: 305  
+- dim_product: 4,071  
+- fact_sales: 1,083,818  
+
+**Notes:**
+- Transitioned development to Visual Studio Code (WSL).
+- Implemented robust ETL pipeline: CSV → staging → star schema → analytics.
+- Demonstrates end-to-end data engineering workflow.
+
+---
+
+## Next Steps
+
+- Build BI dashboards (Day 6–7).  
+- Add Python EDA notebooks (Week 2).  
+- Extend to Spark (PySpark) and Kafka streaming demos.  
+- Document results with screenshots, CSV artifacts, and logs in `docs/`.
 
 **Prereqs (WSL):**
 - Python venv: `sudo apt install -y python3-venv` (or `python3.12-venv`)
@@ -72,6 +116,6 @@ data-analyst-portfolio/
 - `.env` set for local socket auth (no host):  
   ```ini
   PGUSER=arval
-  PGDATABASE=postgres
+  PGDATABASE=de_commerce
   # PGHOST unset to prefer Unix socket; set PGSSLMODE=prefer or comment it out
 
