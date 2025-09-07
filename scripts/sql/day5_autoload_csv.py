@@ -1,15 +1,7 @@
 # scripts/sql/day5_autoload_csv.py
-# -*- coding: utf-8 -*-
-"""
-Auto-create a staging table (all TEXT columns) from a CSV header and bulk load it.
-
-Usage:
-  python scripts/sql/day5_autoload_csv.py \
-    --csv datasets/ecommerce_sales.csv --schema stage --table raw_ecommerce [--replace]
-
-Requires: psycopg (v3) -> pip install "psycopg[binary]"
-Reads connection info from env (.env). Defaults to /tmp unix socket for WSL.
-"""
+# Sprint Day: 5  | Type: day-specific
+# Purpose: Create TEXT-only staging table from CSV header and bulk-load via COPY.
+# Adds --encoding option (default UTF8; override for LATIN1/Windows-1252 datasets).
 
 import argparse, csv, os, re, sys
 from pathlib import Path
@@ -20,43 +12,39 @@ def snake(s: str) -> str:
     return s.strip("_").lower()
 
 def conn_params():
-    host = os.getenv("PGHOST") or "/tmp"   # works with your server
+    host = os.getenv("PGHOST") or "/tmp"
     d = {"dbname": os.getenv("PGDATABASE", "postgres")}
     if host: d["host"] = host
     if os.getenv("PGPORT"): d["port"] = int(os.getenv("PGPORT"))
     if os.getenv("PGUSER"): d["user"] = os.getenv("PGUSER")
     if os.getenv("PGPASSWORD"): d["password"] = os.getenv("PGPASSWORD")
     if host and not host.startswith("/"):
-        ssl = os.getenv("PGSSLMODE")
-        if ssl: d["sslmode"] = ssl
+        if os.getenv("PGSSLMODE"): d["sslmode"] = os.getenv("PGSSLMODE")
     return d
 
 def connect():
     import psycopg
     d = conn_params()
-    print(f"[autoload] Connecting with: {{k:d.get(k) for k in ('host','port','dbname','user')}}"
-          .replace("d", "d"))  # cute trick to avoid printing twice
+    summary = {k: d.get(k) for k in ("host", "port", "dbname", "user")}
+    print(f"[autoload] Connecting with: {summary}")
     return psycopg.connect(**d)
 
 def sniff_header_and_delim(csv_path: Path):
-    # sniff delimiter from a sample
     sample = csv_path.read_text(encoding="utf-8-sig", errors="ignore")[:16384]
     try:
         dialect = csv.Sniffer().sniff(sample, delimiters=[",",";","|","\t"])
         delim = dialect.delimiter
     except Exception:
-        delim = ","  # fallback
-    # read header using detected delimiter
+        delim = ","
     with csv_path.open(newline="", encoding="utf-8-sig") as f:
         reader = csv.reader(f, delimiter=delim)
         header = next(reader, [])
     return [snake(c) for c in header], delim
 
-def count_data_rows(csv_path: Path):
+def count_data_rows(csv_path: Path, encoding: str):
     n = 0
-    with csv_path.open("r", encoding="utf-8-sig", errors="ignore") as f:
-        # skip header
-        next(f, None)
+    with csv_path.open("r", encoding=encoding, errors="ignore") as f:
+        next(f, None)  # skip header
         for line in f:
             if line.strip():
                 n += 1
@@ -68,6 +56,7 @@ def main():
     ap.add_argument("--schema", default="stage")
     ap.add_argument("--table", default="raw_ecommerce")
     ap.add_argument("--replace", action="store_true", help="DROP TABLE first")
+    ap.add_argument("--encoding", default="UTF8", help="CSV file encoding (default UTF8, e.g. LATIN1)")
     args = ap.parse_args()
 
     csv_path = Path(args.csv)
@@ -80,7 +69,7 @@ def main():
     if len(set(cols)) != len(cols):
         sys.exit(f"Duplicate column names after normalization: {cols}")
 
-    rows_to_import = count_data_rows(csv_path)
+    rows_to_import = count_data_rows(csv_path, args.encoding)
     print(f"[autoload] CSV delimiter='{delim}' | columns={len(cols)} | data_rows={rows_to_import}")
 
     create_schema = f"CREATE SCHEMA IF NOT EXISTS {args.schema};"
@@ -93,7 +82,7 @@ def main():
     )
     copy_sql = (
         f"COPY {args.schema}.{args.table} "
-        f"({', '.join(cols)}) FROM STDIN WITH (FORMAT csv, HEADER true, DELIMITER '{delim}')"
+        f"({', '.join(cols)}) FROM STDIN WITH (FORMAT csv, HEADER true, DELIMITER '{delim}', ENCODING '{args.encoding}')"
     )
 
     import psycopg
@@ -104,19 +93,16 @@ def main():
             if args.replace:
                 cur.execute(drop_table)
 
-            if args.replace:
+            cur.execute("SELECT to_regclass(%s)", (f"{args.schema}.{args.table}",))
+            if cur.fetchone()[0] is None:
                 cur.execute(create_table)
-            else:
-                cur.execute("SELECT to_regclass(%s)", (f"{args.schema}.{args.table}",))
-                exists = cur.fetchone()[0] is not None
-                if not exists:
-                    cur.execute(create_table)
 
             if rows_to_import == 0:
                 print("⚠️  No data rows found after the header; skipping COPY.")
             else:
-                with csv_path.open("r", encoding="utf-8-sig") as f:
-                    cur.copy(copy_sql, f)
+                with cur.copy(copy_sql) as cp, csv_path.open("r", encoding=args.encoding, newline="") as f:
+                    for chunk in f:
+                        cp.write(chunk)
 
             cur.execute(f"SELECT COUNT(*) FROM {args.schema}.{args.table}")
             n = cur.fetchone()[0]
