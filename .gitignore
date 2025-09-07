@@ -18,3 +18,7 @@ data/processed/
 # VS Code (track settings.json only)
 .vscode/*
 !.vscode/settings.json
+
+# Scratch scripts
+scripts/labs/
+
