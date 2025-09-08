@@ -1,0 +1,33 @@
+========================================
+DAY 6 SPRINT – Customer Analytics Dashboard
+========================================
+
+🎯 OBJECTIVE
+- Connect BI tool to Postgres DWH
+- Build first analytics dashboard (customer, product, revenue)
+- Export screenshots and query results
+
+📝 TASKS
+1. Prepared SQL queries (dashboard metrics).
+2. Connected Power BI / Jupyter to DWH (de_portfolio).
+3. Built visuals:
+   - Monthly revenue trend
+   - Top customers by spend
+   - Top products by revenue
+   - Revenue by country
+4. Exported screenshots to artifacts/day6/
+5. Logged queries and results in artifacts/day6/
+
+📊 RESULTS
+- DWH row counts (verify fact_sales, dims)
+- Portfolio-ready dashboard visuals
+- CSV exports of dashboard queries
+
+🖼️ SCREENSHOTS
+- dashboard_overview.png
+- revenue_trend.png
+- top_customers.png
+- top_products.png
+
+✅ OUTCOME
+Day 6 completed. Repo now demonstrates BI integration over ETL pipeline.
