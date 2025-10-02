@@ -1,25 +1,14 @@
-# Python
-.venv/
+# Python / Jupyter
 __pycache__/
-*.pyc
-
-# Local secrets
+.ipynb_checkpoints/
+.venv/
 .env
 
-# Data (keep Day4 artifacts tracked)
-data/raw/
-data/processed/
-*.parquet
-
-# Editors/OS
+# OS/editor
 .DS_Store
-.idea/
+*.swp
 
-# VS Code (track settings.json only)
-.vscode/*
-!.vscode/settings.json
-
-# Scratch scripts
-scripts/labs/
-
-tooling/
+# Artifacts: keep day6 PNGs, ignore everything else by default
+artifacts/*
+!artifacts/day6/
+!artifacts/day6/*.png
