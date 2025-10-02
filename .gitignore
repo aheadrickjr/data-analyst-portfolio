@@ -1,14 +1,23 @@
-# Python / Jupyter
+# Python / notebook cruft
 __pycache__/
 .ipynb_checkpoints/
 .venv/
 .env
 
-# OS/editor
-.DS_Store
-*.swp
+# Editors
+.vscode/
 
-# Artifacts: keep day6 PNGs, ignore everything else by default
+# General tooling/labs (keep repo clean)
+tooling/
+scripts/labs/
+
+# Django sample app not part of Day 6
+projects/django_app/
+
+# Notebooks outside the Day 6 path
+projects/bi/notebooks/
+
+# Artifacts: keep only Day 6 PNGs
 artifacts/*
 !artifacts/day6/
 !artifacts/day6/*.png
